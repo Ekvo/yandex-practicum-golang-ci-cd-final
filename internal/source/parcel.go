@@ -1,18 +1,13 @@
-package main
+package source
 
 import (
 	"database/sql"
+
+	"github.com/Ekvo/yandex-practicum-golang-ci-cd-final/internal/model"
+	vr "github.com/Ekvo/yandex-practicum-golang-ci-cd-final/internal/variables"
 )
 
-type ParcelStore struct {
-	db *sql.DB
-}
-
-func NewParcelStore(db *sql.DB) ParcelStore {
-	return ParcelStore{db: db}
-}
-
-func (s ParcelStore) Add(p Parcel) (int, error) {
+func (s ParcelStore) Add(p model.Parcel) (int, error) {
 	res, err := s.db.Exec("INSERT INTO parcel (client, status, address, created_at) VALUES (:client, :status, :address, :created_at)",
 		sql.Named("client", p.Client),
 		sql.Named("status", p.Status),
@@ -30,8 +25,8 @@ func (s ParcelStore) Add(p Parcel) (int, error) {
 	return int(id), nil
 }
 
-func (s ParcelStore) Get(number int) (Parcel, error) {
-	p := Parcel{}
+func (s ParcelStore) Get(number int) (model.Parcel, error) {
+	p := model.Parcel{}
 
 	row := s.db.QueryRow("SELECT number, client, status, address, created_at FROM parcel WHERE number = :number",
 		sql.Named("number", number))
@@ -43,7 +38,7 @@ func (s ParcelStore) Get(number int) (Parcel, error) {
 	return p, nil
 }
 
-func (s ParcelStore) GetByClient(client int) ([]Parcel, error) {
+func (s ParcelStore) GetByClient(client int) ([]model.Parcel, error) {
 	rows, err := s.db.Query("SELECT number, client, status, address, created_at FROM parcel WHERE client = :client",
 		sql.Named("client", client))
 	if err != nil {
@@ -51,9 +46,9 @@ func (s ParcelStore) GetByClient(client int) ([]Parcel, error) {
 	}
 	defer rows.Close()
 
-	var res []Parcel
+	var res []model.Parcel
 	for rows.Next() {
-		p := Parcel{}
+		p := model.Parcel{}
 
 		err := rows.Scan(&p.Number, &p.Client, &p.Status, &p.Address, &p.CreatedAt)
 		if err != nil {
@@ -82,7 +77,7 @@ func (s ParcelStore) SetAddress(number int, address string) error {
 	_, err := s.db.Exec("UPDATE parcel SET address = :address WHERE number = :number AND status = :status",
 		sql.Named("address", address),
 		sql.Named("number", number),
-		sql.Named("status", ParcelStatusRegistered))
+		sql.Named("status", vr.ParcelStatusRegistered))
 
 	return err
 }
@@ -90,7 +85,7 @@ func (s ParcelStore) SetAddress(number int, address string) error {
 func (s ParcelStore) Delete(number int) error {
 	_, err := s.db.Exec("DELETE FROM parcel WHERE number = :number AND status = :status",
 		sql.Named("number", number),
-		sql.Named("status", ParcelStatusRegistered))
+		sql.Named("status", vr.ParcelStatusRegistered))
 
 	return err
 }
