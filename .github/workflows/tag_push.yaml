@@ -1,0 +1,14 @@
+name: golang-pipeline
+on: push
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    container: golang:1.22
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Run Unit Tests
+        run: GOOS=linux GOARCH=amd64 go test
+
+      - name: lint
+        run: golangci-lint run
