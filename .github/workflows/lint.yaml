@@ -6,6 +6,8 @@ jobs:
   lint:
     name: Lint
     runs-on: ubuntu-latest
+    env:
+      GOROOT: /usr/local/go # Specify the path to your Go installation
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
