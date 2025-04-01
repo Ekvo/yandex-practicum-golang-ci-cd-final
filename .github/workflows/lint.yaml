@@ -1,16 +1,22 @@
-name: Lint Go code
+name: final-cicd-tags
 
 on: [push]
 
 jobs:
   lint:
-    name: Lint
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
       - uses: actions/setup-go@v4
-        # Используется действие "golangci/golangci-lint-action@v3", которое запускает линтер. Он проверит код на соответствие стилю и отсутствие логических ошибок
+
       - uses: golangci/golangci-lint-action@v3
+
+  tests:
+    need: lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-go@v4
 
       - name: Run Unit Tests
         run: GOOS=linux GOARCH=amd64 go test ./...
