@@ -16,7 +16,9 @@ ADD go.sum .
 
 RUN go mod download
 
-COPY . ./
+COPY ./cmd ./cmd
+
+COPY ./internal ./internal
 
 RUN  go build -o final-cicd ./cmd/app/main.go
 
