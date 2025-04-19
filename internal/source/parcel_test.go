@@ -1,4 +1,4 @@
-package main
+package source
 
 import (
 	"database/sql"
@@ -7,6 +7,10 @@ import (
 	"time"
 
 	"github.com/stretchr/testify/require"
+	_ "modernc.org/sqlite"
+
+	"github.com/Ekvo/yandex-practicum-golang-ci-cd-final/internal/model"
+	vr "github.com/Ekvo/yandex-practicum-golang-ci-cd-final/internal/variables"
 )
 
 var (
@@ -19,10 +23,10 @@ var (
 )
 
 // getTestParcel возвращает тестовую посылку
-func getTestParcel() Parcel {
-	return Parcel{
+func getTestParcel() model.Parcel {
+	return model.Parcel{
 		Client:    1000,
-		Status:    ParcelStatusRegistered,
+		Status:    vr.ParcelStatusRegistered,
 		Address:   "test",
 		CreatedAt: time.Now().UTC().Format(time.RFC3339),
 	}
@@ -31,7 +35,7 @@ func getTestParcel() Parcel {
 // TestAddGetDelete проверяет добавление, получение и удаление посылки
 func TestAddGetDelete(t *testing.T) {
 	// prepare
-	db, err := sql.Open("sqlite", "tracker.db")
+	db, err := sql.Open("sqlite", "../../storage/tracker.db")
 	if err != nil {
 		require.NoError(t, err)
 	}
@@ -61,7 +65,7 @@ func TestAddGetDelete(t *testing.T) {
 // TestSetAddress проверяет обновление адреса
 func TestSetAddress(t *testing.T) {
 	// prepare
-	db, err := sql.Open("sqlite", "tracker.db")
+	db, err := sql.Open("sqlite", "../../storage/tracker.db")
 	if err != nil {
 		require.NoError(t, err)
 	}
@@ -91,7 +95,7 @@ func TestSetAddress(t *testing.T) {
 // TestSetStatus проверяет обновление статуса
 func TestSetStatus(t *testing.T) {
 	// prepare
-	db, err := sql.Open("sqlite", "tracker.db")
+	db, err := sql.Open("sqlite", "../../storage/tracker.db")
 	if err != nil {
 		require.NoError(t, err)
 	}
@@ -106,7 +110,7 @@ func TestSetStatus(t *testing.T) {
 	require.NotEmpty(t, parcel.Number)
 
 	// set status
-	err = store.SetStatus(parcel.Number, ParcelStatusSent)
+	err = store.SetStatus(parcel.Number, vr.ParcelStatusSent)
 
 	require.NoError(t, err)
 
@@ -114,25 +118,25 @@ func TestSetStatus(t *testing.T) {
 	stored, err := store.Get(parcel.Number)
 
 	require.NoError(t, err)
-	require.Equal(t, ParcelStatusSent, stored.Status)
+	require.Equal(t, vr.ParcelStatusSent, stored.Status)
 }
 
 // TestGetByClient проверяет получение посылок по идентификатору клиента
 func TestGetByClient(t *testing.T) {
 	// prepare
-	db, err := sql.Open("sqlite", "tracker.db")
+	db, err := sql.Open("sqlite", "../../storage/tracker.db")
 	if err != nil {
 		require.NoError(t, err)
 	}
 	defer db.Close()
 	store := NewParcelStore(db)
 
-	parcels := []Parcel{
+	parcels := []model.Parcel{
 		getTestParcel(),
 		getTestParcel(),
 		getTestParcel(),
 	}
-	parcelMap := map[int]Parcel{}
+	parcelMap := map[int]model.Parcel{}
 
 	// задаём всем посылкам одного клиента
 	client := randRange.Intn(10_000_000)
